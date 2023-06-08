@@ -1,5 +1,7 @@
 import java.io.*;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class centralDogma {
     public static void main(String[] args) throws IOException {
@@ -11,7 +13,26 @@ public class centralDogma {
         while(br.ready()){
             input+=br.readLine();
         }
-        output(formatProtein(translate(transcribe(input))));
+        //asks user how they want their output formatted using Scanner
+        Scanner sc = new Scanner(System.in);
+        System.out.println("How would you like the output formatted? One Letter or Three Letter? Type \"one\" for one letter and \"three\" for three letters");
+        String inp =sc.next();
+        boolean f = false;
+        if(inp.toLowerCase().equals("three")){
+            f = true;
+        } else  if(inp.toLowerCase().equals("one")){
+            f = false;
+        } else {
+            System.out.println("Invalid Input, Please Try Again");
+            inp = sc.next();
+        }
+        //calls all of the methods required to transcribe and translate the DNA.
+        ArrayList<String> temp;
+        String temp1;
+        input = transcribe(input);
+        temp = translate(input);
+        temp = snip(formatProtein(temp,false));
+        output(formatProtein(temp,f));
     }
     //transcribe replaces all Thymine in the sequence with Uracil using the replaceAll method in the String library.
     public static String transcribe(String input){
@@ -22,8 +43,10 @@ public class centralDogma {
         ArrayList<String> aminos = new ArrayList<String>();
         String codon = "";
         for(int i = 0; i<input.length();i+=3){
-            codon = input.substring(i,i+3);
-            aminos.add(toAmino(codon));
+            if(i+3<input.length()){
+                codon = input.substring(i,i+3);
+                aminos.add(toAmino(codon));
+            }
         }
         return aminos;
     }
@@ -100,13 +123,194 @@ public class centralDogma {
         }
         return amino;
     }
-    //formatProtein formats the list of amino acids so that they are readable and in a format where they can be written to a file.
-    public static String formatProtein(ArrayList<String> aminos){
-        String out = "";
-        for(String amino: aminos){
-            out+= amino+"-";
+    //snip removes junk DNA so that only open reading frames remain
+    public static ArrayList<String> snip(String in){
+        String input;
+        try {
+            input = in.substring(in.indexOf('M'));
+        } catch(Exception e){
+            System.out.println("NO START CODONS");
+            return null;
         }
-        return out.substring(0,out.length()-1);
+        String cut = "";
+        for(int i = 0; i<input.length();i++) {
+            if (input.charAt(i) == '!') {
+                cut += input.substring(0, i);
+                input = input.substring(i);
+                if (input.contains("M")) {
+                    input = input.substring(input.indexOf('M'));
+                } else {
+                    break;
+                }
+                i = 0;
+            }
+        }
+        return toArray(cut);
+    }
+    //formatProtein formats the list of amino acids so that they are readable and in a format where they can be written to a file. This format is either one letter or three letter format, where the three letter format is separated by dashes and the one letter format is not separated by anything.
+    public static String formatProtein(ArrayList<String> aminos,boolean letters){
+        String out = "";
+        if(letters) {
+            for (String amino : aminos) {
+                out += amino + "-";
+            }
+            out = out.substring(0, out.length() - 1);
+        } else{
+            toSimple(aminos);
+            for (String amino : aminos) {
+                out += amino;
+            }
+        }
+        return out;
+    }
+    //toSimple turns the sequence of amino acids into their corresponding one letter form.
+    public static ArrayList<String> toSimple(ArrayList<String> aminos){
+        for(int i = 0; i<aminos.size();i++){
+            switch(aminos.get(i)){
+                case "Ile":
+                    aminos.set(i,"I");
+                    break;
+                case "Met":
+                    aminos.set(i,"M");
+                    break;
+                case "Thr":
+                    aminos.set(i,"T");
+                    break;
+                case "Asn":
+                    aminos.set(i,"N");
+                    break;
+                case "Lys":
+                    aminos.set(i,"K");
+                    break;
+                case "Ser":
+                    aminos.set(i,"S");
+                    break;
+                case "Arg":
+                    aminos.set(i,"R");
+                    break;
+                case "Val":
+                    aminos.set(i,"V");
+                    break;
+                case "Ala":
+                    aminos.set(i,"A");
+                    break;
+                case "Asp":
+                    aminos.set(i,"D");
+                    break;
+                case "Glu":
+                    aminos.set(i,"E");
+                    break;
+                case "Gly":
+                    aminos.set(i,"G");
+                    break;
+                case "Phe":
+                    aminos.set(i,"F");
+                    break;
+                case "Leu":
+                    aminos.set(i,"L");
+                    break;
+                case "Tyr":
+                    aminos.set(i,"Y");
+                    break;
+                case "{!}":
+                    aminos.set(i,"!");
+                    break;
+                case "Cys":
+                    aminos.set(i,"C");
+                    break;
+                case "Trp":
+                    aminos.set(i,"W");
+                    break;
+                case "Pro":
+                    aminos.set(i,"P");
+                    break;
+                case "His":
+                    aminos.set(i,"H");
+                    break;
+                case "Gln":
+                    aminos.set(i,"Q");
+                    break;
+                default:
+                    aminos.set(i,"");
+                    break;
+            }
+        }
+        return aminos;
+    }
+    //toArray turns a string of single characters back to a full array
+    public static ArrayList<String> toArray(String input){
+        ArrayList<String> aminos = new ArrayList<String>();
+        for(int i = 0; i<input.length();i++){
+            switch (input.substring(i,i+1)){
+                case "I":
+                    aminos.add("Ile");
+                    break;
+                case "M":
+                    aminos.add("Met");
+                    break;
+                case "T":
+                    aminos.add("Thr");
+                    break;
+                case "N":
+                    aminos.add("Asn");
+                    break;
+                case "K":
+                    aminos.add("Lys");
+                    break;
+                case "S":
+                    aminos.add("Ser");
+                    break;
+                case "R":
+                    aminos.add("Arg");
+                    break;
+                case "V":
+                    aminos.add("Val");
+                    break;
+                case "A":
+                    aminos.add("Ala");
+                    break;
+                case "D":
+                    aminos.add("Asp");
+                    break;
+                case "E":
+                    aminos.add("Glu");
+                    break;
+                case "G":
+                    aminos.add("Gly");
+                    break;
+                case "F":
+                    aminos.add("Phe");
+                    break;
+                case "L":
+                    aminos.add("Leu");
+                    break;
+                case "Y":
+                    aminos.add("Tyr");
+                    break;
+                case "!":
+                    aminos.add("{!}");
+                    break;
+                case "C":
+                    aminos.add("Cys");
+                    break;
+                case "W":
+                    aminos.add("Trp");
+                    break;
+                case "P":
+                    aminos.add("Pro");
+                    break;
+                case "H":
+                    aminos.add("His");
+                    break;
+                case "Q":
+                    aminos.add("Gln");
+                    break;
+                default:
+                    break;
+
+            }
+        }
+        return aminos;
     }
     //output writes the data that we've collected into a separate file called protein.out, which contains the full protein sequence of the original DNA sequence transcribed and translated.
     public static void output(String input) throws IOException {
