@@ -13,6 +13,7 @@ public class centralDogma {
         while(br.ready()){
             input+=br.readLine();
         }
+        input = clean(input);
         //asks user how they want their output formatted using Scanner
         Scanner sc = new Scanner(System.in);
         System.out.println("How would you like the output formatted? One Letter or Three Letter? Type \"one\" for one letter and \"three\" for three letters");
@@ -32,7 +33,27 @@ public class centralDogma {
         input = transcribe(input);
         temp = translate(input);
         temp = snip(formatProtein(temp,false));
-        output(formatProtein(temp,f));
+        for(String s: temp){
+            System.out.println(s);
+        }
+//        output(formatProtein(temp,f));
+    }
+    //clean removes all non base pairs and capitalizes base pairs
+    public static String clean(String input){
+        input = input.toUpperCase();
+        input.replaceAll(" ","");
+        input.replaceAll("N","");
+        ArrayList<Character> allowed = new ArrayList<>();
+        allowed.add('A');
+        allowed.add('C');
+        allowed.add('T');
+        allowed.add('G');
+        for(int i = 0; i<input.length();i++){
+            if(!allowed.contains(input.charAt(i))){
+                input.replace(input.charAt(i),' ');
+            }
+        }
+        return input;
     }
     //transcribe replaces all Thymine in the sequence with Uracil using the replaceAll method in the String library.
     public static String transcribe(String input){
@@ -133,9 +154,11 @@ public class centralDogma {
             return null;
         }
         String cut = "";
+        ArrayList<String> sequences = new ArrayList<>();
         for(int i = 0; i<input.length();i++) {
             if (input.charAt(i) == '!') {
                 cut += input.substring(0, i);
+                sequences.add(input.substring(0,i));
                 input = input.substring(i);
                 if (input.contains("M")) {
                     input = input.substring(input.indexOf('M'));
@@ -145,7 +168,7 @@ public class centralDogma {
                 i = 0;
             }
         }
-        return toArray(cut);
+        return sequences;
     }
     //formatProtein formats the list of amino acids so that they are readable and in a format where they can be written to a file. This format is either one letter or three letter format, where the three letter format is separated by dashes and the one letter format is not separated by anything.
     public static String formatProtein(ArrayList<String> aminos,boolean letters){
