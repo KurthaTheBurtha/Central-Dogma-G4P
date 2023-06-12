@@ -16,16 +16,25 @@ public class centralDogma {
         input = clean(input);
         //asks user how they want their output formatted using Scanner
         Scanner sc = new Scanner(System.in);
-        System.out.println("How would you like the output formatted? One Letter or Three Letter? Type \"one\" for one letter and \"three\" for three letters");
+        ArrayList<String> allowed = new ArrayList<>();
+        allowed.add("1");
+        allowed.add("2");
+        allowed.add("3");
+        allowed.add("4");
+        allowed.add("5");
+        allowed.add("6");
+        System.out.println("What would you like?");
+        System.out.println("1:spliced protein 2:full protein 3:short spliced protein 4: short full protein 5: long separated frames 6:short separated frames");
         String inp =sc.next();
         boolean f = false;
+        while(!allowed.contains(inp)){
+            System.out.println("Invalid Input. Please Try Again");
+            inp = sc.next();
+        }
         if(inp.toLowerCase().equals("three")){
             f = true;
         } else  if(inp.toLowerCase().equals("one")){
             f = false;
-        } else {
-            System.out.println("Invalid Input, Please Try Again");
-            inp = sc.next();
         }
         //calls all of the methods required to transcribe and translate the DNA.
         ArrayList<String> temp;
@@ -41,7 +50,6 @@ public class centralDogma {
     //clean removes all non base pairs and capitalizes base pairs
     public static String clean(String input){
         input = input.toUpperCase();
-        input.replaceAll(" ","");
         input.replaceAll("N","");
         ArrayList<Character> allowed = new ArrayList<>();
         allowed.add('A');
@@ -53,6 +61,7 @@ public class centralDogma {
                 input.replace(input.charAt(i),' ');
             }
         }
+        input.replaceAll(" ","");
         return input;
     }
     //transcribe replaces all Thymine in the sequence with Uracil using the replaceAll method in the String library.
