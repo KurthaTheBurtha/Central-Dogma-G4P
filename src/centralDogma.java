@@ -24,28 +24,52 @@ public class centralDogma {
         allowed.add("5");
         allowed.add("6");
         System.out.println("What would you like?");
-        System.out.println("1:spliced protein 2:full protein 3:short spliced protein 4: short full protein 5: long separated frames 6:short separated frames");
+        System.out.println("1:short spliced protein\n2:short full protein\n3:long spliced protein\n4:long full protein\n5:long separated frames \n6:short separated frames");
         String inp =sc.next();
         boolean f = false;
         while(!allowed.contains(inp)){
             System.out.println("Invalid Input. Please Try Again");
             inp = sc.next();
         }
-        if(inp.toLowerCase().equals("three")){
-            f = true;
-        } else  if(inp.toLowerCase().equals("one")){
-            f = false;
-        }
         //calls all of the methods required to transcribe and translate the DNA.
         ArrayList<String> temp;
-        String temp1;
         input = transcribe(input);
         temp = translate(input);
-        temp = snip(formatProtein(temp,false));
-        for(String s: temp){
-            System.out.println(s);
+        //processes user input and calls appropriate methods
+        switch(inp){
+            case "1":
+                temp = snip(formatProtein(temp,false));
+                arrayOut(temp,false);
+                break;
+            case "2":
+                output(formatProtein(temp,false));
+                break;
+            case "3":
+                temp = snip(formatProtein(temp,true));
+                for(int i = 0; i<temp.size();i++){
+                    temp.set(i,temp.get(i).substring(0,temp.get(i).length()-2));
+                }
+                output(formatProtein(temp,true));
+                break;
+            case "4":
+                output(formatProtein(temp,true));
+                break;
+            case "5":
+                temp = (snip(formatProtein(temp,true)));
+                for(int i = 0; i<temp.size();i++){
+                    temp.set(i,temp.get(i).substring(0,temp.get(i).length()-2));
+                }
+                arrayOut(temp,true);
+                break;
+            case "6":
+                temp = (snip(formatProtein(temp,false)));
+                arrayOut(temp,true);
+                break;
+            default:
+                System.out.println("Something went wrong.");
+                break;
         }
-//        output(formatProtein(temp,f));
+
     }
     //clean removes all non base pairs and capitalizes base pairs
     public static String clean(String input){
@@ -184,7 +208,9 @@ public class centralDogma {
         String out = "";
         if(letters) {
             for (String amino : aminos) {
-                out += amino + "-";
+                if(!amino.equals("{")){
+                    out += amino + "-";
+                }
             }
             out = out.substring(0, out.length() - 1);
         } else{
@@ -348,6 +374,21 @@ public class centralDogma {
     public static void output(String input) throws IOException {
         FileWriter fw = new FileWriter("protein.out");
         fw.write(input);
+        fw.close();
+    }
+    public static void arrayOut(ArrayList<String> a, boolean line) throws IOException {
+        FileWriter fw = new FileWriter("protein.out");
+        String s = "";
+        if(line){
+            for(String t: a){
+                s+=t+"\n";
+            }
+        } else{
+            for(String t: a){
+                s+=t;
+            }
+        }
+        fw.write(s);
         fw.close();
     }
 
